@@ -18,6 +18,8 @@ public class LevelManager : MonoBehaviour {
 
 	// UI
 	public Text scoreText;
+	public Text livesCount;
+	public GameObject gameOverScreen;
 
 	public Image heart1;
 	public Image heart2;
@@ -28,10 +30,16 @@ public class LevelManager : MonoBehaviour {
 	public Sprite heartEmpty;
 
 	// Life
-	public int maxLife = 6;
-	private int currentLife;
+	public int maxHealth = 6;
+	private int currentHealth;
 	private bool isHurting = false;
 	private bool isRespawning = false;
+
+	// Lives
+	private int currentLives;
+	public int startingLives = 3;
+	public int coinsToLife = 100;
+
 
 	// LifeCycle
 	private ResetOnRespawn[] objectsToReset;
@@ -41,8 +49,10 @@ public class LevelManager : MonoBehaviour {
 	void Start () {
 		player = FindObjectOfType<PlayerMovement> ();
 		updateScore ();
-		currentLife = maxLife;
+		currentHealth = maxHealth;
+		currentLives = startingLives;
 		updateLife ();
+		updateLives ();
 		objectsToReset = FindObjectsOfType<ResetOnRespawn> ();
 	}
 	
@@ -53,21 +63,29 @@ public class LevelManager : MonoBehaviour {
 	}
 
 	void respawnPlayer() {
-		if (player.isDead || currentLife <= 0) {
+		if (player.isDead || currentHealth <= 0) {
 			if (!isRespawning) {
-				Debug.Log ("LvM Respawn" + currentLife);
+				Debug.Log ("LvM Respawn" + currentHealth);
 				player.isDead = true;
-				currentLife = 0;
+				currentHealth = 0;
 				updateLife ();
-				StartCoroutine ("respawnCo");
-				isRespawning = true;
+				currentLives -= 1;
+				updateLives ();
+				if (currentHealth >= 0) {
+					StartCoroutine ("respawnCo");
+					isRespawning = true;
+				} else {
+					player.gameObject.SetActive (false);
+					gameOverScreen.SetActive (true);
+				}
+
 			}
 		}
 	}
 
 	void hurtPlayer() {
 		if (player.isHurting && !player.isDead && !player.isInvicible) {
-			Debug.Log ("Player took damage" + currentLife);
+			Debug.Log ("Player took damage" + currentHealth);
 			if (!isHurting) {
 				StartCoroutine ("hurtPlayerCo");
 				player.knockBack ();
@@ -83,8 +101,7 @@ public class LevelManager : MonoBehaviour {
 		score = 0;
 		updateScore();
 		yield return new WaitForSeconds (respawnTime);
-		currentLife = maxLife;
-
+		currentHealth = maxHealth;
 		updateLife ();
 		player.gameObject.SetActive (true);
 		player.respawn ();
@@ -94,7 +111,7 @@ public class LevelManager : MonoBehaviour {
 
 	IEnumerator hurtPlayerCo() {
 		Debug.Log ("LvM Respawn");
-		currentLife -= 1;
+		currentHealth -= 1;
 		updateLife ();
 		yield return new WaitForSeconds (hurtDelay);
 		isHurting = false;
@@ -104,6 +121,11 @@ public class LevelManager : MonoBehaviour {
 		Debug.Log ("Player picked up a coin");
 		score += value;
 		updateScore ();
+
+		if (score % coinsToLife == 0) {
+			currentLives += 1;
+			updateLives ();
+		}
 	}
 
 	private void updateScore() {
@@ -111,7 +133,7 @@ public class LevelManager : MonoBehaviour {
 	}
 
 	private void updateLife() {
-		switch (currentLife) {
+		switch (currentHealth) {
 		case 0:
 			heart1.sprite = heartEmpty;
 			heart2.sprite = heartEmpty;
@@ -155,6 +177,25 @@ public class LevelManager : MonoBehaviour {
 			
 			objectsToReset [i].gameObject.SetActive (true);
 			objectsToReset [i].resetObject ();
+		}
+	}
+
+	private void updateLives() {
+		livesCount.text = "x" + currentLives;
+	}
+
+	public void addLives(int value) {
+		currentLives += value;
+		updateLives ();
+	}
+
+	public void addHealth(int value) {
+		if (currentHealth < maxHealth) {
+			currentHealth += value;
+			if (currentHealth > maxHealth) {
+				currentHealth = maxHealth;
+			}
+			updateLife ();
 		}
 	}
 }
