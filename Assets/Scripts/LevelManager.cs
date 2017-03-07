@@ -66,10 +66,11 @@ public class LevelManager : MonoBehaviour {
 	}
 
 	void hurtPlayer() {
-		if (player.isHurting && !player.isDead) {
+		if (player.isHurting && !player.isDead && !player.isInvicible) {
 			Debug.Log ("Player took damage" + currentLife);
 			if (!isHurting) {
 				StartCoroutine ("hurtPlayerCo");
+				player.knockBack ();
 				isHurting = true;
 			}
 		}

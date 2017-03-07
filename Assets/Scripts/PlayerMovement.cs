@@ -24,8 +24,13 @@ public class PlayerMovement : MonoBehaviour {
 	Vector3 respawnPosition;
 	Vector3 originalPosition;
 
-
 	public GameObject stompBox;
+	public float knockBackForce;
+	public float knockBackLenght;
+	private float knockBackCounter;
+	public bool isInvicible;
+	public float invincibilityLenght;
+	private float invincibilityCounter;
 
 	// Use this for initialization
 	void Start () {
@@ -44,6 +49,19 @@ public class PlayerMovement : MonoBehaviour {
 		updateStompBox ();
 	}
 
+	void OnTriggerEnter2D(Collider2D other) {
+		if (other.tag == "killZone") {
+			isDead = true;
+		}
+
+		if (other.tag == "Checkpoint") {
+			respawnPosition = other.transform.position + new Vector3 (0, 2, 0);
+		}
+	}
+
+
+	// MARK: Methods
+
 	void updateJumpStatus() {
 		isGrounded = Physics2D.OverlapCircle (groundChecker.position, groundCheckRadius, whatIsGround);
 
@@ -55,26 +73,42 @@ public class PlayerMovement : MonoBehaviour {
 	void selectControlSystem() {
 		if (sceneName == "Scene1") {
 
-			// Horizontal movement
-			rbody.velocity = new Vector3 (movementSpeed * Input.GetAxisRaw ("Horizontal"), rbody.velocity.y, 0f);
-			if (Input.GetAxisRaw ("Horizontal") > 0f) {
-				transform.localScale = new Vector3 (1f, 1f, 1f);
-			} else if (Input.GetAxisRaw ("Horizontal") < 0f) {
-				transform.localScale = new Vector3 (-1f, 1f, 1f);
-			}
+			if (knockBackCounter <= 0) {
+				// Horizontal movement
+				rbody.velocity = new Vector3 (movementSpeed * Input.GetAxisRaw ("Horizontal"), rbody.velocity.y, 0f);
+				if (Input.GetAxisRaw ("Horizontal") > 0f) {
+					transform.localScale = new Vector3 (1f, 1f, 1f);
+				} else if (Input.GetAxisRaw ("Horizontal") < 0f) {
+					transform.localScale = new Vector3 (-1f, 1f, 1f);
+				}
 				
 
 
-			// Jumping
-			if (Input.GetButtonDown("Jump") && (isGrounded || !isDoubleJumping)) {
-				if (!isGrounded) {
-					isDoubleJumping = true;
-				}
+				// Jumping
+				if (Input.GetButtonDown ("Jump") && (isGrounded || !isDoubleJumping)) {
+					if (!isGrounded) {
+						isDoubleJumping = true;
+					}
 
-				rbody.velocity = new Vector3(rbody.velocity.x, jumpPower, 0f);
+					rbody.velocity = new Vector3 (rbody.velocity.x, jumpPower, 0f);
+				}
+			} else {
+				knockBackCounter -= Time.deltaTime;
+				if (transform.localScale.x > 0) {
+					rbody.velocity = new Vector3 (-knockBackForce, knockBackForce, 0f);
+				} else {
+					rbody.velocity = new Vector3 (knockBackForce, knockBackForce, 0f);
+				}
+			}
+
+			if (invincibilityCounter <= 0) {
+				isInvicible = false;
+			} else {
+				isInvicible = true;
+				invincibilityCounter -= Time.deltaTime;
 			}
 		} else {
-
+			// RPG Style with 3D Style control
 			Vector2 movementVector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
 
 			//		if (movementVector != Vector2.zero) {
@@ -95,15 +129,7 @@ public class PlayerMovement : MonoBehaviour {
 		anim.SetFloat ("inputX", Mathf.Abs (rbody.velocity.x));
 	}
 
-	void OnTriggerEnter2D(Collider2D other) {
-		if (other.tag == "killZone") {
-			isDead = true;
-		}
 
-		if (other.tag == "Checkpoint") {
-			respawnPosition = other.transform.position + new Vector3 (0, 2, 0);
-		}
-	}
 
 	public void respawn() {
 		Debug.Log ("Respawning Player");
@@ -122,5 +148,10 @@ public class PlayerMovement : MonoBehaviour {
 		} else {
 			stompBox.SetActive (false);
 		}
+	}
+
+	public void knockBack() {
+		knockBackCounter = knockBackLenght;
+		invincibilityCounter = invincibilityLenght;
 	}
 }
