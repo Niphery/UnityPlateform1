@@ -45,6 +45,8 @@ public class LevelManager : MonoBehaviour {
 
 	// Sounds
 	public AudioSource coinPickupSound;
+	public AudioSource mainSoundTrack;
+	public AudioSource gameOverSound;
 
 
 	// Use this for initialization
@@ -77,8 +79,7 @@ public class LevelManager : MonoBehaviour {
 					StartCoroutine ("respawnCo");
 					isRespawning = true;
 				} else {
-					player.gameObject.SetActive (false);
-					gameOverScreen.SetActive (true);
+					gameOver ();
 				}
 
 			}
@@ -203,5 +204,12 @@ public class LevelManager : MonoBehaviour {
 			}
 			updateLife ();
 		}
+	}
+
+	private void gameOver() {
+		player.gameObject.SetActive (false);
+		gameOverScreen.SetActive (true);
+		mainSoundTrack.Stop ();
+		gameOverSound.Play ();
 	}
 }
