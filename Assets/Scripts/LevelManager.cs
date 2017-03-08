@@ -40,9 +40,11 @@ public class LevelManager : MonoBehaviour {
 	public int startingLives = 3;
 	public int coinsToLife = 100;
 
-
 	// LifeCycle
 	private ResetOnRespawn[] objectsToReset;
+
+	// Sounds
+	public AudioSource coinPickupSound;
 
 
 	// Use this for initialization
@@ -89,6 +91,7 @@ public class LevelManager : MonoBehaviour {
 			if (!isHurting) {
 				StartCoroutine ("hurtPlayerCo");
 				player.knockBack ();
+				player.hurtSound.Play ();
 				isHurting = true;
 			}
 		}
@@ -119,6 +122,7 @@ public class LevelManager : MonoBehaviour {
 
 	public void addCoins(int value) {
 		Debug.Log ("Player picked up a coin");
+		coinPickupSound.Play ();
 		score += value;
 		updateScore ();
 
@@ -186,10 +190,12 @@ public class LevelManager : MonoBehaviour {
 
 	public void addLives(int value) {
 		currentLives += value;
+		coinPickupSound.Play ();
 		updateLives ();
 	}
 
 	public void addHealth(int value) {
+		coinPickupSound.Play ();
 		if (currentHealth < maxHealth) {
 			currentHealth += value;
 			if (currentHealth > maxHealth) {

@@ -32,6 +32,10 @@ public class PlayerMovement : MonoBehaviour {
 	public float invincibilityLenght;
 	private float invincibilityCounter;
 
+	// Audio
+	public AudioSource jumpSound;
+	public AudioSource hurtSound;
+
 	// Use this for initialization
 	void Start () {
 		rbody = GetComponent<Rigidbody2D> ();
@@ -89,7 +93,7 @@ public class PlayerMovement : MonoBehaviour {
 					if (!isGrounded) {
 						isDoubleJumping = true;
 					}
-
+					jumpSound.Play ();
 					rbody.velocity = new Vector3 (rbody.velocity.x, jumpPower, 0f);
 				}
 			} else {
