@@ -7,7 +7,7 @@ public class PlayerMovement : MonoBehaviour {
 
 	Rigidbody2D rbody;
 	Animator anim;
-	string sceneName;
+//	string sceneName;
 
 	public float movementSpeed = 3f;
 	public float jumpPower = 3f;
@@ -40,7 +40,7 @@ public class PlayerMovement : MonoBehaviour {
 	void Start () {
 		rbody = GetComponent<Rigidbody2D> ();
 		anim = GetComponent<Animator> ();
-		sceneName = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().name;
+//		sceneName = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().name;
 		originalPosition = transform.position;
 		respawnPosition = new Vector3 (0, 0, 0);
 	}
@@ -75,9 +75,8 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	void selectControlSystem() {
-		if (sceneName == "Scene1") {
 
-			if (knockBackCounter <= 0) {
+		if (knockBackCounter <= 0) {
 				// Horizontal movement
 				rbody.velocity = new Vector3 (movementSpeed * Input.GetAxisRaw ("Horizontal"), rbody.velocity.y, 0f);
 				if (Input.GetAxisRaw ("Horizontal") > 0f) {
@@ -111,9 +110,9 @@ public class PlayerMovement : MonoBehaviour {
 				isInvicible = true;
 				invincibilityCounter -= Time.deltaTime;
 			}
-		} else {
+//		} else {
 			// RPG Style with 3D Style control
-			Vector2 movementVector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
+//			Vector2 movementVector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
 
 			//		if (movementVector != Vector2.zero) {
 			//			anim.SetBool ("isWalking", true);
@@ -123,9 +122,9 @@ public class PlayerMovement : MonoBehaviour {
 			//			anim.SetBool ("isWalking", false);
 			//		}
 
-			rbody.MovePosition (rbody.position + movementVector * Time.deltaTime * movementSpeed);
+//			rbody.MovePosition (rbody.position + movementVector * Time.deltaTime * movementSpeed);
 
-		}
+//		}
 	}
 
 	void updateAnimationStates() {

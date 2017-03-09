@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour {
 
@@ -12,7 +13,7 @@ public class LevelManager : MonoBehaviour {
 	public float hurtDelay = 2;
 
 	// Coins System
-	public int score = 0;
+	private int score;
 	private CoinScript[] coins;
 	private int totalCoins;
 
@@ -49,15 +50,16 @@ public class LevelManager : MonoBehaviour {
 	public AudioSource gameOverSound;
 
 
+	//Ending Level
+	private Fading fading;
+	private string levelToLoad;
+
 	// Use this for initialization
 	void Start () {
 		player = FindObjectOfType<PlayerMovement> ();
-		updateScore ();
-		currentHealth = maxHealth;
-		currentLives = startingLives;
-		updateLife ();
-		updateLives ();
+		fading = GetComponent<Fading> ();
 		objectsToReset = FindObjectsOfType<ResetOnRespawn> ();
+		initKeyValues ();
 	}
 	
 	// Update is called once per frame
@@ -211,5 +213,47 @@ public class LevelManager : MonoBehaviour {
 		gameOverScreen.SetActive (true);
 		mainSoundTrack.Stop ();
 		gameOverSound.Play ();
+	}
+
+	public void startChangeLevel(string value) {
+		levelToLoad = value;
+		StartCoroutine ("changeLevelCo");
+	}
+
+
+	IEnumerator changeLevelCo() {
+		yield return new WaitForSeconds (0.6f);
+
+		float fadeTime = fading.BeginFade (1);
+		PlayerPrefs.SetInt ("scoreKey", score);
+		PlayerPrefs.SetInt ("livesKey", currentLives);
+		PlayerPrefs.SetInt ("healthKey", currentHealth);
+
+		yield return new WaitForSeconds (fadeTime);
+		SceneManager.LoadSceneAsync (levelToLoad);
+	}
+
+	private void initKeyValues() {
+		if (PlayerPrefs.HasKey ("scoreKey")) {
+			score = PlayerPrefs.GetInt ("scoreKey");
+		} else {
+			score = 0;
+		}
+
+		if (PlayerPrefs.HasKey ("healthKey")) {
+			currentHealth = PlayerPrefs.GetInt ("healthKey");
+		} else {
+			currentHealth = maxHealth;
+		}
+
+		if (PlayerPrefs.HasKey ("livesKey")) {
+			currentLives = PlayerPrefs.GetInt ("livesKey");
+		} else {
+			currentLives = startingLives;
+		}
+
+		updateScore ();
+		updateLife ();
+		updateLives ();
 	}
 }
